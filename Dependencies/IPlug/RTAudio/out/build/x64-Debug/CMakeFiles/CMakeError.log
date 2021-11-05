@@ -1,0 +1,14 @@
+Determining if the function gettimeofday exists failed with the following output:
+Change Dir: C:/cygwin64/home/ahann/apps/iplug/iPlug2/Dependencies/IPlug/RTAudio/out/build/x64-Debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_90ac0 && [1/2] Building CXX object CMakeFiles\cmTC_90ac0.dir\CheckFunctionExists.cxx.obj
+[2/2] Linking CXX executable cmTC_90ac0.exe
+FAILED: cmTC_90ac0.exe 
+cmd.exe /C "cd . && "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_90ac0.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x64\mt.exe --manifests  -- C:\PROGRA~2\MICROS~3\2019\COMMUN~1\VC\Tools\MSVC\1429~1.301\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_90ac0.dir\CheckFunctionExists.cxx.obj  /out:cmTC_90ac0.exe /implib:cmTC_90ac0.lib /pdb:cmTC_90ac0.pdb /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+LINK Pass 1: command "C:\PROGRA~2\MICROS~3\2019\COMMUN~1\VC\Tools\MSVC\1429~1.301\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_90ac0.dir\CheckFunctionExists.cxx.obj /out:cmTC_90ac0.exe /implib:cmTC_90ac0.lib /pdb:cmTC_90ac0.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\cmTC_90ac0.dir/intermediate.manifest CMakeFiles\cmTC_90ac0.dir/manifest.res" failed (exit code 1120) with the following output:
+CheckFunctionExists.cxx.obj : error LNK2019: unresolved external symbol gettimeofday referenced in function main
+cmTC_90ac0.exe : fatal error LNK1120: 1 unresolved externals
+ninja: build stopped: subcommand failed.
+
+
+
