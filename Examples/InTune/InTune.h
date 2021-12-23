@@ -10,36 +10,24 @@ const int kNumPresets = 3;
 
 enum EParams
 {
-  kGain = 0,
   kNumParams
 };
 
 enum EMsgTags
 {
-  kMsgTagButton1 = 0,
-  kMsgTagButton2 = 1,
-  kMsgTagButton3 = 2,
-  kMsgTagBinaryTest = 3
-};
-
-enum EControlTags
-{
-  kCtrlTagMeter = 0,
+  kMsgTagStop = 0,
+  kMsgTagSet = 1
 };
 
 class InTune final : public Plugin
 {
 public:
   InTune(const InstanceInfo& info);
-  
-  void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
-  void OnReset() override;
-  void OnIdle() override;
-  bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
-  void OnParamChange(int paramIdx) override;
 
-private:
-  float mLastPeak = 0.;
-  FastSinOscillator<sample> mOscillator {0., 440.};
-  LogParamSmooth<sample, 1> mGainSmoother;
+#if IPLUG_DSP // http://bit.ly/2S64BDd
+public:
+  void ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) override;
+  bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
+  void ProcessMidiMsg(const IMidiMsg& msg) override;
+#endif
 };

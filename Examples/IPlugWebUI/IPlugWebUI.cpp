@@ -8,13 +8,14 @@ IPlugWebUI::IPlugWebUI(const InstanceInfo& info)
 
   // Hard-coded paths must be modified!
 #ifdef OS_WIN
-  SetWebViewPaths("C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugWebUI\\packages\\Microsoft.Web.WebView2.1.0.824-prerelease\\runtimes\\win-x64\\native\\WebView2Loader.dll", "C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugWebUI\\");
+  SetWebViewPaths("C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\IPlugWebUI\\packages\\Microsoft.Web.WebView2.1.0.824-prerelease\\runtimes\\win-x64\\native\\WebView2Loader.dll", "C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\IPlugWebUI\\");
 #endif
 
 
   mEditorInitFunc = [&]() {
 #ifdef OS_WIN
-    LoadFile("C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugWebUI\\resources\\web\\index.html", nullptr);
+    //LoadFile("C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\InTune\\resources\\ui\\build\\index.html", nullptr);
+    LoadFile("C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\IPlugWebUI\\resources\\web\\index.html", nullptr);
 #else
     LoadFile("index.html", GetBundleID());
 #endif
@@ -81,3 +82,5 @@ void IPlugWebUI::OnParamChange(int paramIdx)
 {
   DBGMSG("gain %f\n", GetParam(paramIdx)->Value());
 }
+
+

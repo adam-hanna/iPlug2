@@ -18,14 +18,14 @@
 #define PLUG_CHANNEL_IO "2-2"
 
 #define PLUG_LATENCY 0
-#define PLUG_TYPE 0
-#define PLUG_DOES_MIDI_IN 0
-#define PLUG_DOES_MIDI_OUT 0
-#define PLUG_DOES_MPE 0
+#define PLUG_TYPE 2
+#define PLUG_DOES_MIDI_IN 1
+#define PLUG_DOES_MIDI_OUT 1
+#define PLUG_DOES_MPE 1
 #define PLUG_DOES_STATE_CHUNKS 0
 #define PLUG_HAS_UI 1
-#define PLUG_WIDTH 600
-#define PLUG_HEIGHT 600
+#define PLUG_WIDTH 2560
+#define PLUG_HEIGHT 1920
 #define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 #define PLUG_HOST_RESIZE 0
@@ -36,14 +36,14 @@
 #define AUV2_VIEW_CLASS InTune_View
 #define AUV2_VIEW_CLASS_STR "InTune_View"
 
-#define AAX_TYPE_IDS 'IPWV'
-#define AAX_TYPE_IDS_AUDIOSUITE 'IPWA'
+#define AAX_TYPE_IDS 'IPME'
+#define AAX_TYPE_IDS_AUDIOSUITE 'IPMA'
 #define AAX_PLUG_MFR_STR "Acme"
 #define AAX_PLUG_NAME_STR "InTune\nIPEF"
 #define AAX_PLUG_CATEGORY_STR "Effect"
 #define AAX_DOES_AUDIOSUITE 1
 
-#define VST3_SUBCATEGORY "Fx"
+#define VST3_SUBCATEGORY "Instrument|Synth"
 
 #define APP_NUM_CHANNELS 2
 #define APP_N_VECTOR_WAIT 0
