@@ -58,12 +58,14 @@ const BarsWrapper = styled.div`
 type BarState = {
   musicKey: string;
   scale: string;
+  midi: string;
 }
 
 const initialBars: BarState[] = [
   {
     musicKey: "C",
     scale: "major",
+    midi: "not set"
   }
 ]
 
@@ -77,6 +79,15 @@ type BarReducerFn = (state: BarState[], action: Action) => BarState[];
 
 const barReducer: BarReducerFn = (state, action) => {
   switch (action.type) {
+    case "CHANGE_MIDI":
+      return state.map((bar, idx) => {
+        if (idx === action.idx) {
+          return { ...bar, midi: action.data }
+        }
+
+        return bar
+      })
+
     case "CHANGE_KEY":
       return state.map((bar, idx) => {
         if (idx === action.idx) {
@@ -110,7 +121,7 @@ const barReducer: BarReducerFn = (state, action) => {
       }
 
     case "ADD_BAR":
-      return [...state, { musicKey: "C", scale: "major" }]
+      return [...state, { musicKey: "C", scale: "major", midi: "not set" }]
 
     case "REMOVE_BAR":
     return [...state].filter((bar, idx) => {
@@ -132,13 +143,17 @@ export const Manual = ({}: Props) => {
   const [scaleModal, setScaleModal] = useState(false)
   const [scale, setScale] = useState('Major')
 
-  const [icon, setIcon] = useState('play')
+  const [nextMidi, setNextMidi] = useState('not set')
+  const [prevMidi, setPrevMidi] = useState('not set')
 
   const handleKeyChange = (idx: number, data: string) => {
     dispatch({ idx, type: 'CHANGE_KEY', data });
   };
   const handleScaleChange = (idx: number, data: string) => {
     dispatch({ idx, type: 'CHANGE_SCALE', data });
+  };
+  const handleMIDIChange = (idx: number, data: string) => {
+    dispatch({ idx, type: 'CHANGE_MIDI', data });
   };
 
   const LowAudio = new Audio("https://in-tune-media.s3.amazonaws.com/Low_Seiko_SQ50.wav")
@@ -277,30 +292,47 @@ export const Manual = ({}: Props) => {
           <Button secondary onClick={() => { setScaleModal(true) }}>Set All Scales</Button>
         </ControlsWrapper>
         <InputsWrapper>
-          <Icon
-            // @ts-ignore
-            name={icon}
-            size='huge'
+          <div
+            className="ui labeled button"
+            style={{ marginTop: '20px', marginLeft: '5px' }}
             onClick={() => {
-              HighAudio.play()
-              if (icon === 'play') {
-                setIcon('stop')
-              } else {
-                setIcon('play')
-              }
+
             }}
-            style={{ cursor: 'pointer' }}
-          />
+          >
+            <div className="ui button">
+              <i className="angle right icon"></i> Next
+            </div>
+            <a className="ui basic label">
+              {nextMidi}
+            </a>
+          </div>
+          <div
+            className="ui labeled button"
+            style={{ marginTop: '20px', marginLeft: '5px' }}
+            onClick={() => {
+
+            }}
+          >
+            <div className="ui button">
+              <i className="angle left icon"></i> Prev
+            </div>
+            <a className="ui basic label">
+              {prevMidi}
+            </a>
+          </div>
         </InputsWrapper>
       </HeaderWrapper>
       <BarsWrapper>
         <ol>
           {(bars as BarState[]).map((bar, idx) => (
-            <li>
+            <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: `rgba(255, 255, 0, ${currentBar === idx ? 1 : 0})`, cursor: 'pointer', paddingBottom: '5px' }}>
+              {<Icon title='Remove' style={{ position: 'static', color: 'red', fontSize: '50px', marginTop: '20px', paddingTop: '10px' }} name='remove circle' onClick={() => {
+                  dispatch({ idx, type: 'REMOVE_BAR', data: '' })
+                }} />}
               <KeyAndScaleSelectors
                 key={idx}
-                disableSelectors={icon === 'stop'}
-                isActive={currentBar === idx}
+                disableSelectors={false}
+                isActive={false}
 
                 musicKey={bar.musicKey}
                 onKeyChange={(key: string) => { handleKeyChange(idx, key) }}
@@ -308,18 +340,27 @@ export const Manual = ({}: Props) => {
                 scale={bar.scale}
                 onScaleChange={(scale: string) => { handleScaleChange(idx, scale) }}
               />
-              {icon !== 'stop' && <Icon style={{ position: 'absolute', color: 'red', fontSize: '50px', left: '125px', top: '52.5px' }} name='remove circle' onClick={() => {
-                  if (icon !== 'stop') {
-                    dispatch({ idx, type: 'REMOVE_BAR', data: '' })
-                  }
-                }} />}
+              <div
+                className="ui labeled button"
+                style={{ marginTop: '20px', marginLeft: '5px' }}
+                onClick={() => {
+                  handleMIDIChange(idx, "press midi button")
+                }}
+              >
+                <div className="ui button">
+                  <i className="edit icon"></i> MIDI Button
+                </div>
+                <a className="ui basic label">
+                  {bar.midi}
+                </a>
+              </div>
             </li>
           ))}
         </ol>
       </BarsWrapper>
         <Button
           primary
-          disabled={icon === 'stop'}
+          disabled={false}
           onClick={() => { dispatch({ idx: -1, type: 'ADD_BAR', data: '' }) }}
         >
           Add Bar
