@@ -106,27 +106,6 @@ InTune::InTune(const InstanceInfo& info)
 }
 
 #if IPLUG_DSP
-void InTune::ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames)
-{
-  /*
-  const double gain = GetParam(kGain)->DBToAmp();
-  
-  sample maxVal = 0.;
-  
-  mOscillator.ProcessBlock(inputs[0], nFrames); // comment for audio in
-
-  for (int s = 0; s < nFrames; s++)
-  {
-    outputs[0][s] = inputs[0][s] * mGainSmoother.Process(gain);
-    outputs[1][s] = outputs[0][s]; // copy left
-    
-    maxVal += std::fabs(outputs[0][s]);
-  }
-  
-  mLastPeak = static_cast<float>(maxVal / (sample) nFrames);
-  */
-}
-
 bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
 {
   DBGMSG("have mesage; tag %d\n", msgTag);
@@ -159,6 +138,17 @@ bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
 
     new_scale.insert(new_scale.begin(), 0);
     km.set_scale(new_scale);
+    break;
+  }
+  case kMsgPing:
+  {
+    DBGMSG("kMsgPing");
+    //unsigned char buffer[p.length()];
+    //copy(p.begin(), p.end(), buffer);
+    //const uint8_t p = 7;
+    //const uint8_t* pPtr = &p;
+    string ret = "pong";
+    InTune::SendArbitraryMsgFromDelegate(1, ret.length(), ret.c_str());
     break;
   }
   default:

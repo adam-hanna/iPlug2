@@ -7,6 +7,7 @@ import { BarAndSelectors } from '../../Components/BarAndSelectors'
 import { KeysToRootNoteMap } from '../../Keys'
 import { ScaleSelector } from '../../Components/Selectors/Scales'
 import {
+  MODE_AUTOMATIC,
   SET,
   STOP,
   SAMFUI
@@ -162,6 +163,12 @@ export const Automatic = ({}: Props) => {
 
   const LowAudio = new Audio("https://in-tune-media.s3.amazonaws.com/Low_Seiko_SQ50.wav")
   const HighAudio = new Audio("https://in-tune-media.s3.amazonaws.com/High_Seiko_SQ50.wav")
+
+  useEffect(() => {
+    if (NODE_ENV === 'production') {
+      SAMFUI(MODE_AUTOMATIC, -1, '');
+    }
+  }, [])
 
   useEffect(() => {
     const relativeBeat = (beatNumber % (bars.length * beatsPerBar))

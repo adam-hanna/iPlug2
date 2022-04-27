@@ -60,13 +60,58 @@ public:
     EvaluateJavaScript(str.Get());
   }
 
+  static void DBGMSG3(const char* format, ...)
+  {
+    char buf[4096], * p = buf;
+    va_list args;
+    int     n;
+
+    va_start(args, format);
+    n = _vsnprintf(p, sizeof buf - 3, format, args); // buf-3 is room for CR/LF/NUL
+    va_end(args);
+
+    p += (n < 0) ? sizeof buf - 3 : n;
+
+    while (p > buf && isspace(p[-1]))
+      *--p = '\0';
+
+    *p++ = '\r';
+    *p++ = '\n';
+    *p = '\0';
+
+    OutputDebugString(buf);
+  }
+
   void SendArbitraryMsgFromDelegate(int msgTag, int dataSize, const void* pData) override
   {
+    DBGMSG3("in SendArbitraryMsgFromDelegate");
     WDL_String str;
     std::vector<char> base64;
     base64.resize(GetBase64Length(dataSize));
     wdl_base64encode(reinterpret_cast<const unsigned char*>(pData), base64.data(), dataSize);
-    str.SetFormatted(mMaxJSStringLength, "SAMFD(%i, %i, %s)", msgTag, dataSize, base64.data());
+    /*/
+    std::vector<char> vec;
+    vec.push_back('c');
+    vec.push_back('G');
+    vec.push_back('9');
+    vec.push_back('u');
+    vec.push_back('Z');
+    vec.push_back('w');
+    vec.push_back('=');
+    vec.push_back('=');
+    //cG9uZw==
+    std::string s;
+    for (char c : vec) {
+      s.push_back(c);
+    }
+    */
+
+    //DBGMSG3("vec %s", s);
+    //size_t sz = sizeof(vec[0]) * vec.size();
+    //char* arr = &vec[0];
+    //str.SetFormatted(mMaxJSStringLength, "SAMFD(%i, %i, \"%s\")", msgTag, 8, "cG9uZw==");
+    str.SetFormatted(mMaxJSStringLength, "SAMFD(%i, %i, \"%s\")", msgTag, dataSize, base64.data());
+    DBGMSG3("string %s", str.Get());
     EvaluateJavaScript(str.Get());
   }
 

@@ -16,7 +16,8 @@ enum EParams
 enum EMsgTags
 {
   kMsgTagStop = 0,
-  kMsgTagSet = 1
+  kMsgTagSet = 1,
+  kMsgPing = 2
 };
 
 class InTune final : public Plugin
@@ -26,7 +27,6 @@ public:
 
 #if IPLUG_DSP // http://bit.ly/2S64BDd
 public:
-  void ProcessBlock(iplug::sample** inputs, iplug::sample** outputs, int nFrames) override;
   bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
   void ProcessMidiMsg(const IMidiMsg& msg) override;
 #endif

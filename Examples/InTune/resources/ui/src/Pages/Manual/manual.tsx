@@ -1,9 +1,16 @@
-import React, { useState, useReducer } from 'react'
+import React, { useEffect, useState, useReducer } from 'react'
 import { Button, Icon, Modal } from 'semantic-ui-react'
 import styled from 'styled-components'
 import { KeyAndScaleSelectors } from '../../Components/KeyAndScaleSelectors'
 
 import { ScaleSelector } from '../../Components/Selectors/Scales'
+import {
+  SET_MIDI,
+  MODE_MANAUL,
+  SAMFUI
+} from '../../utils'
+
+const { NODE_ENV } = process.env
 
 export type Props = {
 
@@ -159,6 +166,19 @@ export const Manual = ({}: Props) => {
   const LowAudio = new Audio("https://in-tune-media.s3.amazonaws.com/Low_Seiko_SQ50.wav")
   const HighAudio = new Audio("https://in-tune-media.s3.amazonaws.com/High_Seiko_SQ50.wav")
 
+  useEffect(() => {
+    if (NODE_ENV === 'production') {
+      SAMFUI(MODE_MANAUL, -1, '');
+
+
+      // @ts-ignore
+      window.SAMFD = (msgTag: number, dataSize: number, msg: Array<number>) => {
+        var decodedData = window.atob(String(msg));
+        console.log("SAMFD msgTag:" + msgTag + "; msg:" + msg + "; decoded:" + decodedData);
+      }
+    }
+  }, [])
+
   return (
     <Wrapper>
       <Modal
@@ -296,7 +316,9 @@ export const Manual = ({}: Props) => {
             className="ui labeled button"
             style={{ marginTop: '20px', marginLeft: '5px' }}
             onClick={() => {
-
+              if (NODE_ENV === 'production') {
+                SAMFUI(SET_MIDI, -1, Buffer.from(["next"]).toString('base64'));
+              }
             }}
           >
             <div className="ui button">
@@ -310,7 +332,10 @@ export const Manual = ({}: Props) => {
             className="ui labeled button"
             style={{ marginTop: '20px', marginLeft: '5px' }}
             onClick={() => {
-
+              if (NODE_ENV === 'production') {
+                let data = Buffer.from(["prev"]).toString('base64')
+                SAMFUI(SET_MIDI, data.length, data);
+              }
             }}
           >
             <div className="ui button">
@@ -320,6 +345,15 @@ export const Manual = ({}: Props) => {
               {prevMidi}
             </a>
           </div>
+          <Button
+           onClick={() => {
+              if (NODE_ENV === 'production') {
+                SAMFUI(2, -1, '');
+              }
+           }}
+          >
+            Ping
+          </Button>
         </InputsWrapper>
       </HeaderWrapper>
       <BarsWrapper>
