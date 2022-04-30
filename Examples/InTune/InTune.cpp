@@ -6,80 +6,6 @@
 
 using namespace std;
 
-struct KeyMapper
-{
-  int key;
-  vector<int> scale;
-  unordered_map<int, int> keys_on_map; // note: map is pressed_key -> transposed_key
-
-  int transpose_pressed_key(const IMidiMsg& msg)
-  {
-    int status = msg.StatusMsg();
-    int pressed_key = msg.NoteNumber();
-
-    if (scale.size() == 0) {
-      return pressed_key;
-    }
-
-    switch (status) {
-    case IMidiMsg::kNoteOn:
-    {
-      // 144 is NOTE_ON
-      int dist_from_root = pressed_key % 12;
-      if (dist_from_root >= scale.size()) {
-        return -1;
-      }
-
-      int offset = scale.at(dist_from_root);
-
-      int octave = pressed_key / 12;
-      int delta_key = key - 12;
-
-      int new_key = (12 * octave) + delta_key + offset;
-
-      keys_on_map.insert({ pressed_key, new_key });
-
-      return new_key;
-    }
-    case IMidiMsg::kNoteOff:
-    {
-      // 128 is NOTE_OFF
-      unordered_map<int, int>::const_iterator mapped_key = keys_on_map.find(pressed_key);
-
-      if (mapped_key == keys_on_map.end()) {
-        return pressed_key;
-      }
-
-      int ret = mapped_key->second;
-      keys_on_map.erase(mapped_key);
-
-      return ret;
-    }
-    default:
-    {
-      DBGMSG("unhandled midi status %d\n", status);
-
-      return -1;
-    }
-    }
-  }
-
-  void set_key(int k)
-  {
-    key = k;
-  }
-
-  void clear_scale()
-  {
-    scale.clear();
-  }
-
-  void set_scale(vector<int> new_scale)
-  {
-    scale = new_scale;
-  }
-};
-
 KeyMapper km = KeyMapper();
 
 InTune::InTune(const InstanceInfo& info)
@@ -125,19 +51,48 @@ bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
       break;
     }
 
+    /*
     for (int i = 0; i < dataSize; i++) {
       DBGMSG("int8Data[%i] - %i", i, int8Data[i]);
     }
+    */
 
     km.set_key(int8Data[0]);
     DBGMSG("new key %i\n", int8Data[0]);
 
     vector<int> new_scale(&int8Data[1], &int8Data[dataSize]);
+
+    /*
     for (int i : new_scale)
       DBGMSG("scale %i\n", i);
+    */
 
     new_scale.insert(new_scale.begin(), 0);
     km.set_scale(new_scale);
+    break;
+  }
+  case kMsgTagModeAutomatic:
+  {
+    // TODO
+
+    break;
+  }
+  case kMsgTagModeManual:
+  {
+    // TODO
+
+    break;
+  }
+  case kMsgTagSetBars:
+  {
+    if (dataSize < 3) {
+      break;
+    }
+
+    auto int8Data = reinterpret_cast<const int8_t*>(pData);
+    vector<int> new_data(&int8Data[0], &int8Data[dataSize]);
+    km.set_bars(new_data);
+
     break;
   }
   case kMsgPing:
@@ -165,6 +120,7 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
   TRACE;
 
   int status = msg.StatusMsg();
+  DBGMSG("status %d\n", status);
   
   switch (status)
   {
@@ -195,7 +151,49 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
 
     return;
   }
-  default: {
+  default:
+  {
+    int ctrl = msg.ControlChangeIdx();
+    DBGMSG("ctrl %d\n", ctrl);
+
+    switch (ctrl)
+    {
+    case IMidiMsg::kUndefined102:
+    {
+      // note: 102 is prev bar
+      km.prev();
+
+      break;
+    }
+    case IMidiMsg::kUndefined103:
+    {
+      // note: 103 is next bar
+      km.next();
+
+      break;
+    }
+    case IMidiMsg::kUndefined104:
+    case IMidiMsg::kUndefined105:
+    case IMidiMsg::kUndefined106:
+    case IMidiMsg::kUndefined107:
+    case IMidiMsg::kUndefined108:
+    case IMidiMsg::kUndefined109:
+    case IMidiMsg::kUndefined110:
+    case IMidiMsg::kUndefined111:
+    {
+      // note: change to a stored bar
+      km.set_bar_at_idx(ctrl - 104);
+
+      break;
+    }
+    default:
+    {
+      // note: do nothing...
+    }
+    }
+
+    SendMidiMsg(msg);
+
     return;
   }
   }

@@ -1,10 +1,11 @@
 // FROM DELEGATE
 
-export const STOP: number = 0;
-export const SET: number = 1;
-export const SET_MIDI: number = 2;
+export const PING: number = 0;
+export const STOP: number = 1;
+export const SET: number = 2;
 export const MODE_AUTOMATIC: number = 3;
 export const MODE_MANAUL: number = 4;
+export const SET_BARS: number = 5;
 
 export const SPVFD = (paramIdx: number, val: number) => {
   // @ts-ignore
