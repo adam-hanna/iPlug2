@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Select } from 'semantic-ui-react'
+import { Dropdown } from 'semantic-ui-react'
 import { Scale } from "@tonaljs/tonal"
 
 const BoldLabel = styled.label`
@@ -26,8 +26,8 @@ export const ScaleSelector = ({
 }: ScaleSelectorProps) => {
   const scales = Scale.names().sort().map(name => {
     return {
-      key: name, 
-      value: name, 
+      key: name,
+      value: name,
       text: name
     }
   })
@@ -35,14 +35,16 @@ export const ScaleSelector = ({
   return (
     <Wrapper>
       <BoldLabel style={{ color: disable ? '#ccc' : 'black' }}>Scale:</BoldLabel>
-      <Select 
+      <Dropdown
+        search
+        selection
         disabled={disable}
-        value={value} 
-        onChange={e => { 
-          onChange((e.target as HTMLDivElement).textContent || '') 
-        }} 
-        placeholder='Select the scale' 
-        options={scales} 
+        value={value}
+        onChange={e => {
+          onChange((e.target as HTMLDivElement).textContent || '')
+        }}
+        placeholder='Select the scale'
+        options={scales}
       />
     </Wrapper>
   )

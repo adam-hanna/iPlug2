@@ -14,7 +14,7 @@ struct KeyScales
 
 struct KeyMapper
 {
-  int keyScaleIDX;
+  int keyScaleIDX = 0;
   int key;
   vector<int> scale;
   vector<KeyScales> keyScales;
@@ -74,27 +74,36 @@ struct KeyMapper
 
   void clear_scale()
   {
+    Trace("KeyMapper::clear_scale", __LINE__, "");
     scale.clear();
   }
 
   void set_scale(vector<int> new_scale)
   {
+    std::string str;
+    for (int i : new_scale)
+    {
+      str.push_back(i + '0');
+    }
+    Trace("KeyMapper::set_scale", __LINE__, "new scales : [%s]", str);
+
     scale = new_scale;
   }
 
   void set_key(int k)
   {
+    Trace("KeyMapper::set_key", __LINE__, "key : %d", key);
     key = k;
   }
 
   void set_bars(vector<int> data)
   {
-    if (data.size() < 3) {
+    keyScales.clear();
+
+    if (data.size() < 3)
+    {
       return;
     }
-
-    keyScales.clear();
-    keyScaleIDX = 0;
 
     KeyScales k;
 
@@ -136,6 +145,27 @@ struct KeyMapper
         continue;
       }
     }
+
+
+    idx = 0;
+    Trace("KeyMapper::set_bars", __LINE__, "keyScales.size() : %d", keyScales.size());
+    for (KeyScales k : keyScales)
+    {
+      std::string str;
+      for (int i : k.scale)
+      {
+        str.push_back(i + '0');
+      }
+      Trace("KeyMapper::set_bars", __LINE__, "#%d - key : %d; scales : [%s]", idx, k.key, str);
+      idx++;
+    }
+
+    
+    if (keyScaleIDX > keyScales.size() - 1)
+    {
+      keyScaleIDX = keyScales.size() - 1;
+    }
+    set_bar_at_idx(keyScaleIDX);
   }
 
   void prev()
@@ -155,6 +185,7 @@ struct KeyMapper
       keyScaleIDX--;
     }
 
+    Trace("KeyMapper::prev", __LINE__, "new keyScaleIDX : %d", keyScaleIDX);
     set_bar_at_idx(keyScaleIDX);
   }
 
@@ -175,6 +206,7 @@ struct KeyMapper
       keyScaleIDX++;
     }
 
+    Trace("KeyMapper::next", __LINE__, "new keyScaleIDX : %d", keyScaleIDX);
     set_bar_at_idx(keyScaleIDX);
   }
 
@@ -182,7 +214,8 @@ struct KeyMapper
   {
     try
     {
-      auto newKeyScale = keyScales.at(keyScaleIDX);
+      Trace("KeyMapper::set_bar_at_idx", __LINE__, "idx : %d", idx);
+      auto newKeyScale = keyScales.at(idx);
       set_key(newKeyScale.key);
       set_scale(newKeyScale.scale);
     }
@@ -290,7 +323,6 @@ bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
     }
     km.set_bars(new_data);
     
-
     break;
   }
   case kMsgPing:
@@ -308,6 +340,7 @@ bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
   default:
   {
     DBGMSG("unknown mesage tag %d\n", msgTag);
+    break;
   }
   }
 
@@ -319,6 +352,9 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
   TRACE;
 
   int status = msg.StatusMsg();
+  int ctrl = msg.ControlChangeIdx();
+
+  Trace("InTune::ProcessMidiMsg", __LINE__, "status : %d; ctrl : %d", status, ctrl);
   DBGMSG("status %d\n", status);
   
   switch (status)
@@ -347,12 +383,10 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
     new_msg.MakeNoteOffMsg(new_note_number, msg.mOffset, msg.Channel());
 
     SendMidiMsg(new_msg);
-
     return;
   }
   default:
   {
-    int ctrl = msg.ControlChangeIdx();
     DBGMSG("ctrl %d\n", ctrl);
 
     switch (ctrl)
@@ -372,12 +406,19 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
       break;
     }
     case IMidiMsg::kUndefined104:
+      [[fallthrough]];
     case IMidiMsg::kUndefined105:
+      [[fallthrough]];
     case IMidiMsg::kUndefined106:
+      [[fallthrough]];
     case IMidiMsg::kUndefined107:
+      [[fallthrough]];
     case IMidiMsg::kUndefined108:
+      [[fallthrough]];
     case IMidiMsg::kUndefined109:
+      [[fallthrough]];
     case IMidiMsg::kUndefined110:
+      [[fallthrough]];
     case IMidiMsg::kUndefined111:
     {
       // note: change to a stored bar
@@ -388,6 +429,7 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
     default:
     {
       // note: do nothing...
+      break;
     }
     }
 

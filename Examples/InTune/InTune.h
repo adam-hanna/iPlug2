@@ -3,6 +3,7 @@
 #include "IPlug_include_in_plug_hdr.h"
 #include "Oscillator.h"
 #include "Smoothers.h"
+#include "IPlugLogger.h"
 
 using namespace iplug;
 
