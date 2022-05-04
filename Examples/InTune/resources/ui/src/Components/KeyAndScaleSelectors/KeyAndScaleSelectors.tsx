@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import { ScaleSelector } from '../Selectors/Scales'
 import { KeySelector } from '../Selectors/Keys'
+import { Semitones } from '../Selectors/Semitones'
 
 export type Props = {
   disableSelectors: boolean;
@@ -13,6 +14,9 @@ export type Props = {
 
   scale: string;
   onScaleChange: (scale: string) => void;
+
+  semitones: string;
+  onSemitonesChange: (semitone: string) => void;
 }
 
 const Wrapper = styled.div`
@@ -28,6 +32,8 @@ export const KeyAndScaleSelectors = ({
   onKeyChange,
   scale,
   onScaleChange,
+  semitones,
+  onSemitonesChange,
 }: Props) => {
   return (
     <Wrapper style={{ backgroundColor: `rgba(255, 255, 0, ${isActive ? 1 : 0})` }}>
@@ -40,6 +46,11 @@ export const KeyAndScaleSelectors = ({
         disable={disableSelectors}
         value={scale}
         onChange={onScaleChange}
+      />
+      <Semitones
+        disable={scale.toLocaleLowerCase() !== "custom"}
+        value={semitones}
+        onChange={onSemitonesChange}
       />
     </Wrapper>
   )

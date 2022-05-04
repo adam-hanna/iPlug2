@@ -24,12 +24,17 @@ export const ScaleSelector = ({
   value,
   onChange
 }: ScaleSelectorProps) => {
-  const scales = Scale.names().sort().map(name => {
+  let scales = Scale.names().sort().map(name => {
     return {
       key: name,
       value: name,
       text: name
     }
+  })
+  scales.push({
+    key: "custom",
+    value: "custom",
+    text: "custom"
   })
 
   return (

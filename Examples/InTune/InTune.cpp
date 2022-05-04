@@ -349,8 +349,6 @@ bool InTune::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
 
 void InTune::ProcessMidiMsg(const IMidiMsg& msg)
 {
-  TRACE;
-
   int status = msg.StatusMsg();
   int ctrl = msg.ControlChangeIdx();
 
@@ -366,6 +364,8 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
       return;
     }
 
+    int pressed_key = msg.NoteNumber();
+    Trace("InTune::kNoteOn", __LINE__, "pressed key : [%d]; new note number : [%d]", pressed_key, new_note_number);
     IMidiMsg new_msg;
     new_msg.MakeNoteOnMsg(new_note_number, msg.Velocity(), msg.mOffset, msg.Channel());
 
@@ -379,6 +379,8 @@ void InTune::ProcessMidiMsg(const IMidiMsg& msg)
       return;
     }
 
+    int pressed_key = msg.NoteNumber();
+    Trace("InTune::kNoteOff", __LINE__, "pressed key : [%d]; new note number : [%d]", pressed_key, new_note_number);
     IMidiMsg new_msg;
     new_msg.MakeNoteOffMsg(new_note_number, msg.mOffset, msg.Channel());
 
