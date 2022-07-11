@@ -83,32 +83,52 @@ const ListItem = styled.li`
   padding-right: 5px;
 `
 
+const calcSemitonesFromScale = (scale: string): Array<number> => {
+  if (scale.toLocaleLowerCase() === "custom") {
+    return [0]
+  }
+
+  const { intervals } = ScaleType.get(scale)
+  let semitones: Array<number> = [0]
+  intervals.forEach(interval => {
+    const intrvl = Interval.semitones(interval)
+    if (intrvl) {
+      semitones.push(intrvl)
+    }
+  })
+
+  return semitones
+}
+
 type BarState = {
   musicKey: string;
   scale: string;
+  semiTones: Array<number>;
 }
 
 const InitialKey = "C"
 const InitialScale = "major"
+const InitialSemitones = calcSemitonesFromScale(InitialScale)
 
 const initialBars: BarState[] = [
   {
     musicKey: InitialKey,
-    scale: InitialScale
+    scale: InitialScale,
+    semiTones: InitialSemitones,
   }
 ]
 
 type Action = {
   idx: number;
   type: string;
-  data: string;
+  data: string | Array<number>;
 }
 
 type BarReducerFn = (state: BarState[], action: Action) => BarState[];
 
 const barReducer: BarReducerFn = (state, action) => {
   switch (action.type) {
-    case "CHANGE_KEY":
+    case "CHANGE_KEY": {
       return state.map((bar, idx) => {
         if (idx === action.idx) {
           return { ...bar, musicKey: action.data }
@@ -116,44 +136,65 @@ const barReducer: BarReducerFn = (state, action) => {
 
         return bar
       })
+    }
 
-    case "CHANGE_SCALE":
+    case "CHANGE_SCALE": {
+      const newSemiTones = calcSemitonesFromScale(action.data as string)
+
       return state.map((bar, idx) => {
         if (idx === action.idx) {
-          return { ...bar, scale: action.data }
+          return { ...bar, scale: action.data, semiTones: newSemiTones }
         }
 
         return bar
       })
+    }
 
-    case "CHANGE_ALL_SCALES":
-      return state.map((bar) => {
-        return { ...bar, scale: action.data }
+    case "CHANGE_SEMITONES": {
+      return state.map((bar, idx) => {
+        if (idx === action.idx) {
+          return { ...bar, semiTones: action.data }
+        }
+
+        return bar
       })
+    }
 
-    case "SET_BARS":
+    case "CHANGE_ALL_SCALES": {
+      const newSemiTones = calcSemitonesFromScale(action.data as string)
+
+      return state.map((bar) => {
+        return { ...bar, scale: action.data, semiTones: newSemiTones }
+      })
+    }
+
+    case "SET_BARS": {
       try {
-        const newBars = JSON.parse(action.data)
+        const newBars = JSON.parse(action.data as string)
         return [ ...newBars ]
       } catch(e) {
         console.error('err processing data', action.data, e)
         return [ ...state ]
       }
+    }
 
-    case "ADD_BAR":
+    case "ADD_BAR": {
       return state.length === 8 ?
         [...state] :
-        [...state, { musicKey: InitialKey, scale: InitialScale }];
+        [...state, { musicKey: InitialKey, scale: InitialScale, semiTones: InitialSemitones }];
+    }
 
-    case "REMOVE_BAR":
+    case "REMOVE_BAR": {
       return state.length === 1 ?
         [...state] :
         [...state].filter((bar, idx) => {
           return idx !== action.idx
         });
+    }
 
-    default:
+    default: {
       return state;
+    }
   }
 }
 
@@ -165,53 +206,17 @@ export const Manual = (_props: Props) => {
   const [currentBar, _setCurrentBar] = useState(0)
 
   const [scaleModal, setScaleModal] = useState(false)
-  const [scale, setScale] = useState('Major')
+  const [scale, setScale] = useState(InitialScale)
 
-  const [semitonesStr, setSemitonesStr] = useState<string>("[]")
-  const setSemitoneStrAtIDX = (idx: number, set: string) => {
-    set = set.replaceAll("[", "")
-    set = set.replaceAll("]", "")
-
-    let tmpStr = semitonesStr.substring(1, semitonesStr.length - 1)
-    let tmpArr = tmpStr.split("],[").map(el => {
-      el = el.replaceAll("[", "")
-      el = el.replaceAll("]", "")
-
-      return el
-    })
-    if (idx > tmpArr.length) {
-      return
-    }
-
-    tmpArr[idx] = set
-
-    let s = tmpArr.join("],[")
-    s = "[" + s + "]"
-
-    setSemitonesStr(s)
-  }
-  const getSemitoneStrAtIDX = (idx: number): string => {
-    let tmpStr = semitonesStr.substring(1, semitonesStr.length - 1)
-    let tmpArr = tmpStr.split("],[")
-    if (idx > tmpArr.length) {
-      return "[]"
-    }
-
-    let tmp = tmpArr[idx]
-    if (!tmp) {
-      return "[]"
-    }
-    tmp = tmp.replaceAll("[", "")
-    tmp = tmp.replaceAll("]", "")
-    tmp = "[" + tmp + "]"
-    return tmp
-  }
 
   const handleKeyChange = (idx: number, data: string) => {
     dispatch({ idx, type: 'CHANGE_KEY', data });
   };
   const handleScaleChange = (idx: number, data: string) => {
     dispatch({ idx, type: 'CHANGE_SCALE', data });
+  };
+  const handleSemiTonesChange = (idx: number, data: Array<number>) => {
+    dispatch({ idx, type: 'CHANGE_SEMITONES', data });
   };
 
   useEffect(() => {
@@ -228,48 +233,15 @@ export const Manual = (_props: Props) => {
   }, [])
 
   useEffect(() => {
-  }, [bars])
-
-  useEffect(() => {
-    let tmpSemitones: Array<Array<number>> = []
-    let tmpStr = semitonesStr
-    tmpStr = tmpStr.replaceAll(",]", "]")
-    let tmpSemitonesJson = JSON.parse(tmpStr)
-    let idx = 0
-    for (const { musicKey, scale } of bars) {
-      if (musicKey.toLocaleLowerCase() === "custom") {
-        if (tmpSemitones.length > idx) {
-          tmpSemitones.push([])
-        } else {
-          tmpSemitones.push(tmpSemitonesJson[idx])
-        }
-      } else {
-        const { intervals } = ScaleType.get(scale)
-        let tmp: Array<number> = [0]
-        intervals.forEach(interval => {
-          const intrvl = Interval.semitones(interval)
-          if (intrvl) {
-            tmp.push(intrvl)
-          }
-        })
-
-        tmpSemitones.push(tmp)
-      }
-      idx++
+    let arr: Array<number> = []
+    for (const { musicKey, semiTones } of bars) {
+      const keyIDX = KeysToRootNoteMap[musicKey]
+      arr = [...arr, keyIDX, ...semiTones, -1]
     }
 
-    setSemitonesStr(JSON.stringify(tmpSemitones))
+    console.log(`sending set bars: ${SET_BARS}; ${JSON.stringify(arr)}`)
 
     if (NODE_ENV === 'production') {
-      let arr: Array<number> = []
-      idx = 0
-      for (const { musicKey } of bars) {
-        const keyIDX = KeysToRootNoteMap[musicKey]
-        const semitones = tmpSemitones[idx]
-
-        arr = [...arr, keyIDX, ...semitones, -1]
-      }
-
       SAMFUI(SET_BARS, -1, Buffer.from(arr).toString('base64'));
     }
   }, [bars])
@@ -434,8 +406,8 @@ export const Manual = (_props: Props) => {
                 scale={bar.scale}
                 onScaleChange={(scale: string) => { handleScaleChange(idx, scale) }}
 
-                semitones={getSemitoneStrAtIDX(idx)}
-                onSemitonesChange={(semitone: string) => { setSemitoneStrAtIDX(idx, semitone) }}
+                semitones={bar.semiTones}
+                onSemitonesChange={(semitones: Array<number>) => { handleSemiTonesChange(idx, semitones) }}
               />
             </ListItem>
           ))}

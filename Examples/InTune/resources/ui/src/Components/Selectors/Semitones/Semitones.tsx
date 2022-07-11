@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Input } from 'semantic-ui-react'
 
@@ -14,8 +14,8 @@ const Wrapper = styled.div`
 
 export type SemitonesProps = {
   disable: boolean;
-  value: string;
-  onChange: (semitone: string) => void;
+  value: Array<number>;
+  onChange: (semitone: Array<number>) => void;
 }
 
 export const Semitones = ({
@@ -23,15 +23,32 @@ export const Semitones = ({
   value,
   onChange
 }: SemitonesProps) => {
+  const [tmpState, onChangeTmpState] = useState(JSON.stringify(value))
+
+  useEffect(() => {
+    onChangeTmpState(JSON.stringify(value))
+  }, [value])
+
+  useEffect(() => {
+    if (tmpState.charAt(tmpState.length - 2) === ",") {
+      return
+    }
+
+    try {
+      onChange(JSON.parse(tmpState.replace(",]", "]")))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [tmpState])
 
   return (
     <Wrapper>
       <BoldLabel style={{ color: disable ? '#ccc' : 'black' }}>Semitones:</BoldLabel>
       <Input
         disabled={disable}
-        value={value}
+        value={tmpState}
         onChange={e => {
-          onChange((e.target as HTMLInputElement).value || '[]')
+          onChangeTmpState((e.target as HTMLInputElement).value || '[]')
         }}
         placeholder='Semitones'
       />

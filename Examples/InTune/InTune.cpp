@@ -8,16 +8,16 @@ using namespace std;
 
 struct KeyScales
 {
-  int key;
-  vector<int> scale;
+  int key = 0;
+  vector<int> scale = {};
 };
 
 struct KeyMapper
 {
   int keyScaleIDX = 0;
-  int key;
-  vector<int> scale;
-  vector<KeyScales> keyScales;
+  int key = 0;
+  vector<int> scale = {};
+  vector<KeyScales> keyScales = {};
   unordered_map<int, int> keys_on_map; // note: map is pressed_key -> transposed_key
 
   int transpose_pressed_key(const IMidiMsg& msg)
@@ -215,7 +215,7 @@ struct KeyMapper
     try
     {
       Trace("KeyMapper::set_bar_at_idx", __LINE__, "idx : %d", idx);
-      auto newKeyScale = keyScales.at(idx);
+      KeyScales newKeyScale = keyScales.at(idx);
       set_key(newKeyScale.key);
       set_scale(newKeyScale.scale);
     }
@@ -235,14 +235,14 @@ InTune::InTune(const InstanceInfo& info)
 
   // Hard-coded paths must be modified!
 #ifdef OS_WIN
-  SetWebViewPaths("C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\InTune\\packages\\Microsoft.Web.WebView2.1.0.824-prerelease\\runtimes\\win-x64\\native\\WebView2Loader.dll", "C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\InTune\\");
+  SetWebViewPaths("C:\\cygwin64\\home\\Adam\\apps\\iPlug2\\Examples\\InTune\\packages\\Microsoft.Web.WebView2.1.0.824-prerelease\\runtimes\\win-x64\\native\\WebView2Loader.dll", "C:\\cygwin64\\home\\Adam\\apps\\iPlug2\\Examples\\InTune\\");
 #endif
 
 
   mEditorInitFunc = [&]() {
 #ifdef OS_WIN
     //LoadHTML(R"(<h1>Foo</h1>)");
-    LoadFile("C:\\cygwin64\\home\\ahann\\apps\\iplug\\iPlug2\\Examples\\InTune\\resources\\ui\\build\\index.html", nullptr);
+    LoadFile("C:\\cygwin64\\home\\Adam\\apps\\iPlug2\\Examples\\InTune\\resources\\ui\\build\\index.html", nullptr);
 #else
     LoadFile("index.html", GetBundleID());
 #endif

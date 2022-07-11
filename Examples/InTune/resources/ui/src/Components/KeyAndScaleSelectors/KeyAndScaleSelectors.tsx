@@ -15,8 +15,8 @@ export type Props = {
   scale: string;
   onScaleChange: (scale: string) => void;
 
-  semitones: string;
-  onSemitonesChange: (semitone: string) => void;
+  semitones: Array<number>;
+  onSemitonesChange: (semitone: Array<number>) => void;
 }
 
 const Wrapper = styled.div`
